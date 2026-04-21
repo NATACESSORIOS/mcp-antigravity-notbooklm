@@ -1,0 +1,22 @@
+{
+  "name": "mcp-antigravity-notebooklm",
+  "version": "1.0.0",
+  "description": "MCP configuration for Antigravity + NotebookLM & Firebase integration with legal analysis pipeline scripts",
+  "main": "scripts/extract_pdf.js",
+  "scripts": {
+    "extract": "node scripts/extract_pdf.js"
+  },
+  "keywords": [
+    "mcp",
+    "antigravity",
+    "notebooklm",
+    "firebase",
+    "pdf-extraction",
+    "legal-analysis"
+  ],
+  "author": "NATACESSORIOS",
+  "license": "MIT",
+  "dependencies": {
+    "pdf-parse": "^1.1.1"
+  }
+}
