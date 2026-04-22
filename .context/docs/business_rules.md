@@ -1,29 +1,73 @@
-# Regras de Negócio Imutáveis
+# Regras de Negócio — NUNCA QUEBRE ESTAS REGRAS
 
-## Regras da Esteira de Análise
+> Estas regras são absolutas. Não há exceções. Se uma situação parecer exigir quebrar uma regra, PARE e pergunte ao usuário.
 
-1. **Extração Local Obrigatória**: Todo PDF deve ser extraído localmente via `scripts/extract_pdf.js` (pdf-parse) antes de ser enviado ao NotebookLM. Não enviar PDFs diretamente — apenas o `.txt` extraído.
+---
 
-2. **Documentos Efêmeros**: Após o upload de um `.txt` ao NotebookLM e a conclusão da análise, o source criado DEVE ser deletado com `source_delete`. O NotebookLM é usado como motor de análise, não como arquivo permanente de processos avulsos.
+## REGRA 1 — Extração local obrigatória
+**O quê:** Todo PDF deve ser convertido em .txt antes de ir para o NotebookLM.
+**Como:** Rodando `npm run processar` no terminal do projeto.
+**Por quê:** O NotebookLM tem problemas com PDFs protegidos ou com formatação complexa.
+**Erro proibido:** Nunca envie um .pdf diretamente para o NotebookLM. Sempre use o .txt extraído.
 
-3. **Mapa de Cadernos é a Fonte da Verdade**: O arquivo `notebooks_map.json` é a única referência válida para o mapeamento pasta → ID de caderno. Qualquer alteração de nome de pasta ou novo caderno deve ser atualizada neste arquivo.
+---
 
-4. **Pasta `_processados/`**: Após o processamento, o PDF original deve ser movido para `_processados/` dentro da mesma pasta. Nunca deletar o PDF original.
+## REGRA 2 — Documentos efêmeros (limpeza obrigatória)
+**O quê:** Após cada análise, o documento enviado ao NotebookLM DEVE ser deletado.
+**Como:** Usando a ferramenta MCP `source_delete` com o `source_id` retornado pelo upload.
+**Por quê:** Evita poluir o caderno com processos avulsos que não fazem parte da base permanente.
+**Erro proibido:** Nunca termine uma análise sem executar o `source_delete`.
 
-5. **Resultado na Pasta de Origem**: O arquivo de análise gerado (`NomeArquivo_Analise.md`) deve ser salvo **na mesma pasta do Drive** de onde veio o PDF, nunca em outro local.
+---
 
-6. **Caderno Certo para Cada Processo**: Cada PDF deve ser analisado **exclusivamente** no caderno que corresponde à pasta onde foi depositado. Não cruzar processos entre cadernos.
+## REGRA 3 — Mapa de cadernos é a fonte da verdade
+**O quê:** O arquivo `notebooks_map.json` define qual pasta do Drive corresponde a qual caderno.
+**Como:** Sempre leia o `fila_pendente.json` gerado pelo script — ele já tem o `notebookId` correto.
+**Por quê:** Evita analisar um processo no caderno errado.
+**Erro proibido:** Nunca use um ID de caderno que não veio do `fila_pendente.json` ou do `notebooks_map.json`.
 
-7. **Regra de Ouro CDD**: Nenhuma mudança no código, scripts, banco de dados ou estrutura do projeto pode ser finalizada sem a respectiva atualização dos documentos em `.context/`. A IA deve documentar e codificar simultaneamente.
+---
 
-## Contrato de Orquestração (Antigravity vs NotebookLM)
+## REGRA 4 — Nunca deletar PDFs originais
+**O quê:** O PDF original nunca deve ser apagado.
+**Como:** Após o processamento, mova o PDF para a subpasta `_processados/` dentro da mesma pasta.
+**Por quê:** O usuário pode precisar do arquivo original para consulta futura.
+**Erro proibido:** Nunca use comandos de exclusão (delete, rm, unlink) em arquivos .pdf.
 
-| Tarefa | Responsável |
-|---|---|
-| Varrer pastas e detectar PDFs novos | Antigravity (script) |
-| Extrair texto do PDF | Antigravity (pdf-parse) |
-| Fazer upload do .txt ao caderno | Antigravity (MCP) |
-| Analisar o documento com contexto do caderno | NotebookLM |
-| Salvar o resultado na pasta do Drive | Antigravity |
-| Deletar o source efêmero | Antigravity (MCP) |
-| Mover PDF para _processados/ | Antigravity (script) |
+---
+
+## REGRA 5 — Resultado sempre na pasta de origem
+**O quê:** O arquivo de análise gerado deve ser salvo na mesma pasta do Drive de onde veio o PDF.
+**Como:** Se o PDF veio de `039 - Análise para expedição de alvarás\`, salve o .md lá também.
+**Por quê:** Mantém a organização e permite encontrar o resultado facilmente.
+**Erro proibido:** Nunca salve resultados em uma pasta diferente da de origem.
+
+---
+
+## REGRA 6 — Um caderno por processo
+**O quê:** Cada PDF é analisado exclusivamente no caderno da pasta onde foi depositado.
+**Como:** O script `processar_fila.js` já garante isso automaticamente.
+**Por quê:** Cada caderno tem um contexto específico (ex: homologação, alvará, IDPJ). Misturar contamina a análise.
+**Erro proibido:** Nunca analise um processo de uma pasta em um caderno diferente do mapeado.
+
+---
+
+## REGRA 7 — Regra de Ouro CDD (Context Drift)
+**O quê:** Toda mudança no código ou no fluxo deve ser documentada nos arquivos `.context/`.
+**Como:** Ao alterar um script, atualize `architecture.md`. Ao mudar uma regra, atualize este arquivo.
+**Por quê:** O agente (Gemini Flash) tem memória curta. Sem documentação atualizada, ele vai errar nas próximas sessões.
+**Erro proibido:** Nunca finalize uma sessão com mudanças no código sem atualizar os arquivos `.context/` correspondentes.
+
+---
+
+## Contrato de Responsabilidades
+
+| Tarefa | Quem executa | Ferramenta |
+|---|---|---|
+| Varrer pastas e detectar PDFs novos | Antigravity | `npm run processar` (terminal) |
+| Extrair texto do PDF | Antigravity | `scripts/extract_pdf.js` (via npm run processar) |
+| Fazer upload do .txt ao caderno | Antigravity | MCP: `notebook_add_local_file` |
+| Analisar o documento com contexto do caderno | **NotebookLM** | MCP: `notebook_query` |
+| Salvar resultado na pasta do Drive | Antigravity | Escrita de arquivo local |
+| Deletar o source efêmero | Antigravity | MCP: `source_delete` |
+| Mover PDF para _processados/ | Script automático | `scripts/processar_fila.js` |
