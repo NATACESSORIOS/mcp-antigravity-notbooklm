@@ -4,7 +4,8 @@
   "description": "MCP configuration for Antigravity + NotebookLM & Firebase integration with legal analysis pipeline scripts",
   "main": "scripts/extract_pdf.js",
   "scripts": {
-    "extract": "node scripts/extract_pdf.js"
+    "extract": "node scripts/extract_pdf.js",
+    "processar": "node scripts/processar_fila.js"
   },
   "keywords": [
     "mcp",
