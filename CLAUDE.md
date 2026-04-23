@@ -16,47 +16,104 @@ Antes de qualquer ação, leia estes arquivos nesta ordem:
 
 ---
 
-## PASSO 2 — IDENTIFIQUE O GATILHO DO USUÁRIO
+## PASSO 2 — IDENTIFICAÇÃO DOS TIPOS DE ARQUIVO (CRÍTICO)
 
-O usuário vai usar uma destas frases. Execute EXATAMENTE o que está descrito:
+O script classifica cada PDF da pasta em um dos dois tipos abaixo.
+**Você DEVE tratar cada tipo de forma diferente.**
 
-### Gatilho: "Processar fila"
+### TIPO 1 — PROCESSO (status: `PENDENTE_MCP`)
+- **Como identificar:** O nome do arquivo contém um número de processo trabalhista (ex: `0001631-51.2012.5.03.0033`)
+- **Como tratar:** Upload → Análise → Deletar source (efêmero)
+- **O PDF:** Já foi movido para `_processados/` pelo script
 
-Execute nesta ordem, SEM PULAR ETAPAS:
+### TIPO 2 — FONTE (status: `REGISTRAR_FONTE`)
+- **Como identificar:** O nome do arquivo contém a palavra **"fonte"** (ex: `fonte_jurisprudencia.pdf`, `contexto_fonte.pdf`)
+- **Como tratar:** Upload → Salvar source_id no `notebooks_map.json` → NUNCA deletar (permanente)
+- **O PDF:** Permanece na pasta original (NÃO é movido para `_processados/`)
+- **Para que serve:** É uma referência permanente que o caderno usa como contexto base para analisar processos
 
+---
+
+## PASSO 3 — GATILHO: "Processar fila"
+
+Execute EXATAMENTE nesta ordem, SEM PULAR ETAPAS:
+
+### ETAPA 1 — Rodar o scanner
 ```
-ETAPA 1: Rode o comando abaixo no terminal
-   npm run processar
-   (diretório: c:\Users\gilbe\.gemini\antigravity\scratch\MCP NotebookLM)
+Comando: npm run processar
+Diretório: c:\Users\gilbe\.gemini\antigravity\scratch\MCP NotebookLM
+```
 
-ETAPA 2: Leia o arquivo gerado
-   Abra: fila_pendente.json
-   Cada item tem: caderno, notebookId, txtParaUpload, status
+### ETAPA 2 — Ler a fila gerada
+```
+Abra: fila_pendente.json
+Verifique: quantos itens do tipo PROCESSO e quantos do tipo FONTE
+```
 
-ETAPA 3: Para CADA item com status "PENDENTE_MCP", faça:
-   a) Use a ferramenta MCP: notebook_add_local_file
-      - notebook_id = o campo "notebookId" do item
-      - path = o campo "txtParaUpload" do item
-   b) Aguarde a confirmação de upload
-   c) Use a ferramenta MCP: notebook_query
-      - notebook_id = o mesmo "notebookId"
-      - query = "Faça uma análise completa deste documento jurídico"
-   d) Salve o resultado como arquivo .md na mesma pasta do Drive
-      - Nome: mesmo nome do .txt, mas com sufixo "_Analise.md"
-      - Exemplo: processo_001.txt → processo_001_Analise.md
-   e) Use a ferramenta MCP: source_delete
-      - source_id = o ID retornado pelo notebook_add_local_file
-      - confirm = true
+### ETAPA 3A — Para cada item com status "REGISTRAR_FONTE"
 
-ETAPA 4: Ao terminar todos os itens, informe o resumo:
-   "Processados X de Y processos. Resultados salvos nas pastas do Drive."
+Faça EM ORDEM:
+```
+a) Use a ferramenta MCP: notebook_add_local_file
+   - notebook_id = o campo "notebookId" do item
+   - path        = o campo "txtParaUpload" do item
+
+b) Guarde o source_id retornado (ex: "abc123-...")
+
+c) Abra o arquivo: notebooks_map.json
+
+d) Encontre o notebook cujo "id" = "notebookId" do item
+
+e) Adicione o source_id ao array "fonte_source_ids" deste notebook
+   - Se o campo não existir, crie: "fonte_source_ids": ["abc123-..."]
+   - Se já existir, adicione ao array: ["id_antigo", "abc123-..."]
+
+f) Salve o notebooks_map.json
+
+g) ⚠️ NÃO execute source_delete. A fonte é permanente.
+
+h) ⚠️ NÃO mova o PDF para _processados. Deixe na pasta original.
+```
+
+### ETAPA 3B — Para cada item com status "PENDENTE_MCP"
+
+Faça EM ORDEM:
+```
+a) Leia o campo "fonteSourceIds" do item no fila_pendente.json
+   (É uma lista de IDs de fontes permanentes deste caderno)
+
+b) Use a ferramenta MCP: notebook_add_local_file
+   - notebook_id = o campo "notebookId" do item
+   - path        = o campo "txtParaUpload" do item
+   Guarde o source_id retornado (ex: "xyz789-...")
+
+c) Use a ferramenta MCP: notebook_query
+   - notebook_id = o mesmo "notebookId"
+   - query       = "Faça uma análise jurídica completa e detalhada deste documento..."
+   - source_ids  = [source_id_do_passo_b] + [todos os IDs de "fonteSourceIds"]
+   ⚠️ IMPORTANTE: O source_ids DEVE conter o ID do processo recém-enviado
+   E os IDs das fontes permanentes. Não inclua outros IDs.
+
+d) Salve o resultado como arquivo .md na MESMA PASTA do Drive
+   - Nome: mesmo nome do .txt, mas com sufixo "_Analise.md"
+   - Exemplo: Processo_001.txt → Processo_001_Analise.md
+   - Pasta: a pasta de origem do processo no Drive
+
+e) Use a ferramenta MCP: source_delete
+   - source_id = o source_id do passo b (SOMENTE o do processo)
+   - confirm    = true
+   ⚠️ NUNCA delete os IDs de fonteSourceIds. Apenas o ID do processo.
+```
+
+### ETAPA 4 — Resumo final
+```
+Informe: "Processados X processos e Y fontes registradas."
+Liste os resultados salvos e qualquer erro ocorrido.
 ```
 
 ---
 
-### Gatilho: "Mapear cadernos"
-
-Execute nesta ordem:
+## GATILHO: "Mapear cadernos"
 
 ```
 ETAPA 1: Use a ferramenta MCP: notebook_list
@@ -69,9 +126,7 @@ ETAPA 6: Informe quais cadernos foram adicionados
 
 ---
 
-### Gatilho: "Atualizar engenharia de contexto"
-
-Execute nesta ordem:
+## GATILHO: "Atualizar engenharia de contexto"
 
 ```
 ETAPA 1: Pergunte ao usuário o que mudou no projeto (se não estiver claro)
@@ -82,19 +137,19 @@ ETAPA 4: Informe quais arquivos foram atualizados
 
 ---
 
-## REGRAS QUE VOCÊ NUNCA PODE QUEBRAR
+## REGRAS ABSOLUTAS (NUNCA QUEBRE)
 
-1. NUNCA delete um PDF. Sempre mova para a pasta `_processados/`
-2. NUNCA analise um processo no caderno errado. Use sempre o `notebookId` do `fila_pendente.json`
-3. SEMPRE delete o source do NotebookLM após a análise (source_delete)
-4. NUNCA modifique `notebooks_map.json` ou `mcp_config.json` sem confirmar com o usuário
-5. SEMPRE salve o resultado `.md` na mesma pasta do Drive de onde veio o PDF
+1. NUNCA delete um PDF. Processos vão para `_processados/`. Fontes ficam na pasta original.
+2. NUNCA analise um processo com source_ids de outro processo. Use SOMENTE o ID do processo atual + fonteSourceIds.
+3. SEMPRE delete o source do processo após a análise (source_delete). NUNCA delete fontes.
+4. NUNCA modifique `notebooks_map.json` ou `mcp_config.json` sem confirmar com o usuário (exceto para adicionar fonte_source_ids, que é automático).
+5. SEMPRE salve o resultado `.md` na mesma pasta do Drive de onde veio o PDF.
 
 ---
 
 ## SE ALGO DER ERRADO
 
-- Se o `fila_pendente.json` estiver vazio → informe: "Nenhum PDF novo encontrado nas pastas."
-- Se o `notebook_add_local_file` falhar → pule esse item, anote o erro e continue
-- Se o `notebook_query` não retornar nada → salve o .md com a mensagem "Análise indisponível"
+- Se `fila_pendente.json` estiver vazio → informe: "Nenhum PDF novo encontrado nas pastas."
+- Se `notebook_add_local_file` falhar → pule esse item, anote o erro e continue
+- Se `notebook_query` não retornar nada → salve o .md com a mensagem "Análise indisponível"
 - Se não souber o que fazer → PERGUNTE ao usuário. Não adivinhe.

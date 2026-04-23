@@ -2,6 +2,8 @@
 
 > Estas regras são absolutas. Não há exceções. Se uma situação parecer exigir quebrar uma regra, PARE e pergunte ao usuário.
 
+**Atualizado em:** 2026-04-23 — Adicionadas Regras 8 e 9 sobre classificação de fontes.
+
 ---
 
 ## REGRA 1 — Extração local obrigatória
@@ -57,6 +59,26 @@
 **Como:** Ao alterar um script, atualize `architecture.md`. Ao mudar uma regra, atualize este arquivo.
 **Por quê:** O agente (Gemini Flash) tem memória curta. Sem documentação atualizada, ele vai errar nas próximas sessões.
 **Erro proibido:** Nunca finalize uma sessão com mudanças no código sem atualizar os arquivos `.context/` correspondentes.
+
+---
+
+---
+
+## REGRA 8 — Nunca usar source de outro processo como contexto
+**O quê:** Ao analisar um processo, o `source_ids` da query deve conter APENAS o ID do processo recém-enviado + os IDs de fontes permanentes (`fonte_source_ids`).
+**Como:** O campo `fonteSourceIds` no `fila_pendente.json` já traz os IDs corretos de cada caderno.
+**Por quê:** Se o caderno tiver outro processo acidentalmente, ele seria usado como contexto e contaminaria a análise com dados de outro caso.
+**Erro proibido:** Nunca faça `notebook_query` sem o parâmetro `source_ids`. Nunca inclua IDs que não venham do `fila_pendente.json`.
+
+---
+
+## REGRA 9 — Fontes são permanentes, processos são efêmeros
+**O quê:** Arquivos com a palavra **"fonte"** no nome são referências permanentes do caderno. Arquivos com número de processo são efêmeros.
+**Como distinguir:**
+- Nome contém `fonte` → tipo FONTE → upload + salvar ID em `notebooks_map.json` → NUNCA deletar
+- Nome contém número de processo (ex: `0001631-51.2012.5.03.0033`) → tipo PROCESSO → upload + análise → deletar
+**Por quê:** As fontes contêm contexto jurídico permanente (jurisprudência, modelos, instruções) que enriquecem todas as análises daquele caderno.
+**Erro proibido:** Nunca execute `source_delete` em um source de fonte. Nunca mova um PDF de fonte para `_processados/`.
 
 ---
 
