@@ -54,9 +54,12 @@ Verifique: quantos itens do tipo PROCESSO e quantos do tipo FONTE
 
 Faça EM ORDEM:
 ```
-a) Use a ferramenta MCP: notebook_add_local_file
+a) Use a ferramenta MCP: notebook_add_drive
    - notebook_id = o campo "notebookId" do item
-   - path        = o campo "fileParaUpload" do item  ← é um .pdf
+   - document_id = o campo "driveFileId" do item  ← ID real do Google Drive
+   - title       = o campo "pdfNome" do item
+   - doc_type    = "pdf"
+   ✅ NotebookLM lê o PDF diretamente do Drive com OCR completo (PDFs escaneados incluídos)
 
 b) Guarde o source_id retornado (ex: "abc123-...")
 
@@ -65,8 +68,8 @@ c) Abra o arquivo: notebooks_map.json
 d) Encontre o notebook cujo "id" = "notebookId" do item
 
 e) Adicione o source_id ao array "fonte_source_ids" deste notebook
-   - Se o campo não existir, crie: "fonte_source_ids": ["abc123-..."]
-   - Se já existir, adicione ao array: ["id_antigo", "abc123-..."]
+   - Se não existir: "fonte_source_ids": ["abc123-..."]
+   - Se já existir: adicione ao array
 
 f) Salve o notebooks_map.json
 
@@ -82,12 +85,13 @@ h) ⚠️ NÃO mova o PDF para _processados. Deixe na pasta original.
 Faça EM ORDEM:
 ```
 a) Leia o campo "fonteSourceIds" do item no fila_pendente.json
-   (É uma lista de IDs de fontes permanentes deste caderno)
 
-b) Use a ferramenta MCP: notebook_add_local_file
+b) Use a ferramenta MCP: notebook_add_drive
    - notebook_id = o campo "notebookId" do item
-   - path        = o campo "fileParaUpload" do item  ← é um .pdf
-   ✅ O NotebookLM faz OCR automático. Funciona com PDFs escaneados.
+   - document_id = o campo "driveFileId" do item  ← ID real do Google Drive
+   - title       = o campo "pdfNome" do item
+   - doc_type    = "pdf"
+   ✅ NotebookLM usa OCR interno. Funciona com PDFs escaneados e digitais.
    Guarde o source_id retornado (ex: "xyz789-...")
 
 c) Use a ferramenta MCP: notebook_query
