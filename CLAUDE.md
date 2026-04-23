@@ -101,11 +101,11 @@ c) Use a ferramenta MCP: notebook_query
    ⚠️ IMPORTANTE: O source_ids DEVE conter o ID do processo recém-enviado
    E os IDs das fontes permanentes. Não inclua outros IDs.
 
-d) Salve o resultado como arquivo .docx na MESMA PASTA do Drive
-   - Nome: mesmo nome do .pdf, mas com sufixo "_Analise.docx"
-   - Exemplo: Processo_001.pdf → Processo_001_Analise.docx
-   - Pasta: a pasta de origem do processo no Drive
-   - Crie um arquivo Word formatado a partir da análise Markdown (use o pacote 'docx' no terminal se precisar criar via script, ou se preferir eu mesmo faço a conversão)
+d) Salve o resultado final em DOIS FORMATOS na MESMA PASTA do Drive:
+   - Formato 1 (.docx): Mesmo nome do .pdf, mas com sufixo "_Analise.docx"
+   - Formato 2 (.html): Mesmo nome do .pdf, mas com sufixo "_Analise.html"
+   - Use os scripts `node scripts/generate_docx.js` e `node scripts/generate_html.js` passando o arquivo Markdown original como entrada, ou gere diretamente a partir do Markdown retornado.
+   - O arquivo Markdown bruto (.md) PODE ser deletado após gerar o Word e o HTML para manter a pasta limpa, ou mantido como backup. O usuário quer ver o .docx e o .html.
 
 e) Use a ferramenta MCP: source_delete
    - source_id = o source_id do passo b (SOMENTE o do processo)
