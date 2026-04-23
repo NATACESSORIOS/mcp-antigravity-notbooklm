@@ -162,7 +162,7 @@ function createHtml(markdownText, outputPath) {
 </head>
 <body>
     <div class="container">
-        \${htmlContent}
+        ${htmlContent}
         <div class="watermark">
             Documento processado eletronicamente por IA. Antigravity Legal Pipeline.
         </div>
@@ -170,11 +170,7 @@ function createHtml(markdownText, outputPath) {
 </body>
 </html>`;
 
-    // A substituição do \${htmlContent} precisa ser manual caso não estejamos em um template literal executado, mas ali cima está ok
-    // Vou fazer replace apenas para garantir a segurança da injeção:
-    const finalHtml = htmlTemplate.replace('\\${htmlContent}', htmlContent);
-
-    fs.writeFileSync(outputPath, finalHtml, 'utf8');
+    fs.writeFileSync(outputPath, htmlTemplate, 'utf8');
     console.log(`HTML gerado com sucesso em: ${outputPath}`);
 }
 
