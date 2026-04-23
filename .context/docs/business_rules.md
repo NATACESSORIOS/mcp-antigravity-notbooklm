@@ -6,11 +6,11 @@
 
 ---
 
-## REGRA 1 — Extração local obrigatória
-**O quê:** Todo PDF deve ser convertido em .txt antes de ir para o NotebookLM.
-**Como:** Rodando `npm run processar` no terminal do projeto.
-**Por quê:** O NotebookLM tem problemas com PDFs protegidos ou com formatação complexa.
-**Erro proibido:** Nunca envie um .pdf diretamente para o NotebookLM. Sempre use o .txt extraído.
+## REGRA 1 — Resolução de Google Drive ID obrigatória
+**O quê:** Todo PDF deve ser carregado via seu ID real do Google Drive usando o banco SQLite local do Drive FS.
+**Como:** Rodando `npm run processar` no terminal. O script `processar_fila.js` cuida disso via SQLite.
+**Por quê:** Enviar o arquivo pelo ID nativo do Drive permite ao NotebookLM usar seu próprio motor de OCR embutido (qualidade máxima, suportando escaneados).
+**Erro proibido:** Nunca envie arquivos via caminho local de disco usando ferramentas antigas. Sempre use `notebook_add_drive`.
 
 ---
 
@@ -87,9 +87,9 @@
 | Tarefa | Quem executa | Ferramenta |
 |---|---|---|
 | Varrer pastas e detectar PDFs novos | Antigravity | `npm run processar` (terminal) |
-| Extrair texto do PDF | Antigravity | `scripts/extract_pdf.js` (via npm run processar) |
-| Fazer upload do .txt ao caderno | Antigravity | MCP: `notebook_add_local_file` |
+| Resolver Drive ID via banco SQLite | Antigravity | `scripts/processar_fila.js` |
+| Conectar PDF nativo ao caderno | Antigravity | MCP: `notebook_add_drive` |
 | Analisar o documento com contexto do caderno | **NotebookLM** | MCP: `notebook_query` |
 | Salvar resultado na pasta do Drive | Antigravity | Escrita de arquivo local |
-| Deletar o source efêmero | Antigravity | MCP: `source_delete` |
+| Deletar o source efêmero (Processos) | Antigravity | MCP: `source_delete` |
 | Mover PDF para _processados/ | Script automático | `scripts/processar_fila.js` |

@@ -19,12 +19,14 @@ Você é um agente de automação jurídica. Seu trabalho é ORQUESTRAR tarefas,
 
 ## Ferramentas MCP disponíveis e como usá-las
 
-### `notebook_add_local_file`
-Faz upload de um arquivo .txt para um caderno do NotebookLM.
+### `notebook_add_drive`
+Conecta um PDF nativo diretamente do Google Drive a um caderno do NotebookLM (usando o File ID real).
 ```
 Parâmetros obrigatórios:
   notebook_id: (string) ID do caderno — pegue do fila_pendente.json
-  path:        (string) Caminho absoluto do arquivo .txt no seu computador
+  document_id: (string) File ID real do Google Drive — pegue de 'driveFileId' no fila_pendente.json
+  title:       (string) Nome do PDF para exibição
+  doc_type:    "pdf"
 Retorna: source_id — GUARDE este valor para usar no source_delete depois
 ```
 
@@ -41,7 +43,7 @@ Retorna: texto com a análise gerada pelo NotebookLM
 Remove um source (documento) do caderno do NotebookLM.
 ```
 Parâmetros obrigatórios:
-  source_id: (string) ID retornado pelo notebook_add_local_file
+  source_id: (string) ID retornado pelo notebook_add_drive
   confirm:   true
 ATENÇÃO: Sempre execute isso ao final de cada análise para não poluir o caderno.
 ```
