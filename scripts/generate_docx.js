@@ -7,129 +7,142 @@ async function createDocx(markdownText, outputPath) {
     const lines = markdownText.split('\n');
     const children = [];
 
-    let currentListLevel = -1;
-
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i].trimEnd();
 
         if (line === '' || line.startsWith('---')) {
-            continue; // Ignore separator lines and empty lines for now (or add spacing)
+            continue; // Ignorar linhas em branco ou separadores
         }
 
-        // Headings
+        // Título Principal (H1) - Centralizado, Negrito, Caixa Alta (estilo capa/cabeçalho)
         if (line.startsWith('# ')) {
             children.push(new Paragraph({
-                text: line.replace('# ', ''),
-                heading: HeadingLevel.TITLE,
+                children: [
+                    new TextRun({
+                        text: line.replace('# ', '').toUpperCase(),
+                        bold: true,
+                        size: 28, // 14pt
+                        font: "Arial"
+                    })
+                ],
                 alignment: AlignmentType.CENTER,
                 spacing: { before: 400, after: 400 }
             }));
             continue;
         }
+        
+        // Subtítulo (H2) - Tópicos do Relatório
         if (line.startsWith('## ')) {
             children.push(new Paragraph({
-                text: line.replace('## ', ''),
-                heading: HeadingLevel.HEADING_1,
+                children: [
+                    new TextRun({
+                        text: line.replace('## ', ''),
+                        bold: true,
+                        size: 24, // 12pt
+                        font: "Arial"
+                    })
+                ],
+                alignment: AlignmentType.LEFT,
                 spacing: { before: 300, after: 150 }
             }));
             continue;
         }
+
+        // Seções menores (H3)
         if (line.startsWith('### ')) {
             children.push(new Paragraph({
-                text: line.replace('### ', ''),
-                heading: HeadingLevel.HEADING_2,
+                children: [
+                    new TextRun({
+                        text: line.replace('### ', ''),
+                        bold: true,
+                        italics: true,
+                        size: 24, // 12pt
+                        font: "Arial"
+                    })
+                ],
+                alignment: AlignmentType.LEFT,
                 spacing: { before: 200, after: 100 }
             }));
             continue;
         }
 
-        // Blockquotes
+        // Citações (Blockquotes)
         if (line.startsWith('> ')) {
             children.push(new Paragraph({
                 children: [
                     new TextRun({
                         text: line.replace('> ', ''),
                         italics: true,
-                        color: "555555"
+                        size: 22, // 11pt
+                        font: "Arial"
                     })
                 ],
-                indent: { left: 720 }, // 0.5 inch
+                indent: { left: 1134 }, // 2 cm (1 cm = 567 twips)
+                alignment: AlignmentType.JUSTIFIED,
+                spacing: { before: 150, after: 150 }
+            }));
+            continue;
+        }
+
+        // Listas (Bullets)
+        if (line.startsWith('- ') || line.startsWith('* ')) {
+            const text = line.substring(2);
+            children.push(new Paragraph({
+                children: parseInlineStyles(text),
+                bullet: { level: 0 },
+                alignment: AlignmentType.JUSTIFIED,
                 spacing: { before: 100, after: 100 }
             }));
             continue;
         }
 
-        // List items
-        if (line.startsWith('- ') || line.startsWith('* ')) {
-            const text = line.substring(2);
-            children.push(new Paragraph({
-                text: text,
-                bullet: { level: 0 },
-                spacing: { before: 50, after: 50 }
-            }));
-            continue;
-        }
-
-        // Tables (Very basic rendering as text)
+        // Tabelas (Tratadas como parágrafos simples tabulados por enquanto)
         if (line.startsWith('|')) {
              if(line.includes('---')) continue;
              const columns = line.split('|').filter(c => c.trim() !== '');
-             const text = columns.map(c => c.trim()).join(' - ');
+             const text = columns.map(c => c.trim()).join(' — ');
              children.push(new Paragraph({
                 children: [
                     new TextRun({
                         text: text,
-                        font: "Courier New"
+                        font: "Arial",
+                        size: 24
                     })
                 ],
+                indent: { left: 567 }, // 1 cm
+                alignment: AlignmentType.LEFT,
                 spacing: { before: 50, after: 50 }
             }));
              continue;
         }
 
-
-        // Basic bold/italic parsing (simplified)
-        let textRuns = [];
-        let remainingText = line;
-
-        while (remainingText.length > 0) {
-            const boldMatch = remainingText.match(/\*\*(.*?)\*\*/);
-            const italicMatch = remainingText.match(/\*(.*?)\*/);
-
-            let match = null;
-            let type = '';
-
-            if (boldMatch && (!italicMatch || boldMatch.index < italicMatch.index)) {
-                match = boldMatch;
-                type = 'bold';
-            } else if (italicMatch) {
-                match = italicMatch;
-                type = 'italic';
-            }
-
-            if (match) {
-                if (match.index > 0) {
-                    textRuns.push(new TextRun({ text: remainingText.substring(0, match.index) }));
-                }
-                textRuns.push(new TextRun({
-                    text: match[1],
-                    bold: type === 'bold',
-                    italics: type === 'italic'
-                }));
-                remainingText = remainingText.substring(match.index + match[0].length);
-            } else {
-                textRuns.push(new TextRun({ text: remainingText }));
-                remainingText = '';
-            }
-        }
-
+        // Parágrafos normais (Corpo do Relatório)
         children.push(new Paragraph({
-            children: textRuns,
-            spacing: { before: 100, after: 100 }
+            children: parseInlineStyles(line),
+            alignment: AlignmentType.JUSTIFIED,
+            indent: { firstLine: 708 }, // 1.25 cm (recuo de primeira linha)
+            spacing: { before: 150, after: 150, line: 360 } // Line 360 = 1.5 spacing
         }));
     }
 
     const doc = new Document({
+        styles: {
+            default: {
+                document: {
+                    run: {
+                        font: "Arial",
+                        size: 24, // 12pt padrão
+                        color: "000000",
+                    },
+                    paragraph: {
+                        alignment: AlignmentType.JUSTIFIED,
+                        spacing: {
+                            line: 360, // espaçamento 1.5
+                        },
+                    },
+                },
+            }
+        },
         sections: [{
             properties: {},
             children: children
@@ -139,6 +152,54 @@ async function createDocx(markdownText, outputPath) {
     const buffer = await Packer.toBuffer(doc);
     fs.writeFileSync(outputPath, buffer);
     console.log(`Docx gerado com sucesso em: ${outputPath}`);
+}
+
+// Função auxiliar para processar negrito e itálico dentro do parágrafo
+function parseInlineStyles(text) {
+    let textRuns = [];
+    let remainingText = text;
+
+    while (remainingText.length > 0) {
+        const boldMatch = remainingText.match(/\*\*(.*?)\*\*/);
+        const italicMatch = remainingText.match(/\*(.*?)\*/);
+
+        let match = null;
+        let type = '';
+
+        if (boldMatch && (!italicMatch || boldMatch.index < italicMatch.index)) {
+            match = boldMatch;
+            type = 'bold';
+        } else if (italicMatch) {
+            match = italicMatch;
+            type = 'italic';
+        }
+
+        if (match) {
+            if (match.index > 0) {
+                textRuns.push(new TextRun({ 
+                    text: remainingText.substring(0, match.index),
+                    font: "Arial",
+                    size: 24
+                }));
+            }
+            textRuns.push(new TextRun({
+                text: match[1],
+                bold: type === 'bold',
+                italics: type === 'italic',
+                font: "Arial",
+                size: 24
+            }));
+            remainingText = remainingText.substring(match.index + match[0].length);
+        } else {
+            textRuns.push(new TextRun({ 
+                text: remainingText,
+                font: "Arial",
+                size: 24
+            }));
+            remainingText = '';
+        }
+    }
+    return textRuns;
 }
 
 const args = process.argv.slice(2);
