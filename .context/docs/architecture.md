@@ -26,7 +26,7 @@ NotebookLM aplica seu próprio OCR (funciona com PDFs escaneados)
         ↓
 NotebookLM analisa com contexto dos seus cadernos (notebook_query)
         ↓
-Resultado salvo como NomeArquivo_Analise.md na mesma pasta do Drive
+Resultado salvo como NomeArquivo_Analise.docx e NomeArquivo_Analise.html na mesma pasta do Drive
         ↓
 Source efêmero (se PROCESSO) deletado (source_delete) / Fontes são mantidas
         ↓
@@ -44,6 +44,7 @@ PDF movido para subpasta _processados/ (se PROCESSO)
 - `get_drive_file_id.js` e `query_drive_db.js` — Resolve IDs reais do Drive a partir do banco local SQLite (`mirror_metadata_sqlite.db`)
 - `processar_fila.js` — Varredura das pastas, resolução de Drive IDs em lote, geração de `fila_pendente.json`
 - `create_notebook_folders.js` — Script utilitário para criação das pastas no Drive
+- `generate_docx.js` e `generate_html.js` — Scripts para formatar a saída final para leitura jurídica formal.
 
 ### Arquivos de Estado
 - `notebooks_map.json` — Mapeamento pasta ↔ ID do caderno (fonte da verdade)

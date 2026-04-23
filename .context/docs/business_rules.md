@@ -38,11 +38,11 @@
 
 ---
 
-## REGRA 5 — Resultado sempre na pasta de origem
-**O quê:** O arquivo de análise gerado deve ser salvo na mesma pasta do Drive de onde veio o PDF.
-**Como:** Se o PDF veio de `039 - Análise para expedição de alvarás\`, salve o .md lá também.
-**Por quê:** Mantém a organização e permite encontrar o resultado facilmente.
-**Erro proibido:** Nunca salve resultados em uma pasta diferente da de origem.
+## REGRA 5 — Resultado sempre na pasta de origem com dupla formatação
+**O quê:** O arquivo de análise gerado deve ser salvo na mesma pasta do Drive de onde veio o PDF, em DOIS FORMATOS: `.docx` e `.html`.
+**Como:** Usando os scripts de formatação `generate_docx.js` e `generate_html.js` sobre o texto retornado pela IA. Se o PDF veio de `039 - Análise para expedição de alvarás\`, salve o `.docx` e `.html` lá também.
+**Por quê:** Mantém a organização e permite gerar um relatório formal jurídico pronto para uso.
+**Erro proibido:** Nunca salve resultados apenas em `.md` sem gerar os formatos finais. Nunca salve em pasta diferente da de origem.
 
 ---
 
@@ -90,6 +90,6 @@
 | Resolver Drive ID via banco SQLite | Antigravity | `scripts/processar_fila.js` |
 | Conectar PDF nativo ao caderno | Antigravity | MCP: `notebook_add_drive` |
 | Analisar o documento com contexto do caderno | **NotebookLM** | MCP: `notebook_query` |
-| Salvar resultado na pasta do Drive | Antigravity | Escrita de arquivo local |
+| Salvar resultado em .md, .docx e .html na pasta do Drive | Antigravity | Escrita de arquivo local + `node scripts/generate_*` |
 | Deletar o source efêmero (Processos) | Antigravity | MCP: `source_delete` |
 | Mover PDF para _processados/ | Script automático | `scripts/processar_fila.js` |
