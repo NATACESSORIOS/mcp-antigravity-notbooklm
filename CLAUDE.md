@@ -77,6 +77,8 @@ h) ⚠️ NÃO mova o PDF para _processados. Deixe na pasta original.
 
 ### ETAPA 3B — Para cada item com status "PENDENTE_MCP"
 
+> ⚠️ **AVISO IMPORTANTE antes de executar:** O `source_ids` da MCP query filtra a resposta da IA, mas NÃO remove do caderno outros arquivos que já estejam lá. Se o caderno tiver outro processo permanente (não-fonte), a interface web do NotebookLM vai mostrá-lo como fonte selecionada mesmo assim. Para garantir isolamento total, cadernos de análise devem conter SOMENTE fontes com a palavra "fonte" no nome. Qualquer outro arquivo de processo que esteja permanentemente no caderno deve ser removido manualmente pelo usuário na interface do NotebookLM antes de usar.
+
 Faça EM ORDEM:
 ```
 a) Leia o campo "fonteSourceIds" do item no fila_pendente.json
