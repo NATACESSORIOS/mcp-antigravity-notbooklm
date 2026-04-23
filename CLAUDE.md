@@ -101,10 +101,11 @@ c) Use a ferramenta MCP: notebook_query
    ⚠️ IMPORTANTE: O source_ids DEVE conter o ID do processo recém-enviado
    E os IDs das fontes permanentes. Não inclua outros IDs.
 
-d) Salve o resultado como arquivo .md na MESMA PASTA do Drive
-   - Nome: mesmo nome do .txt, mas com sufixo "_Analise.md"
-   - Exemplo: Processo_001.txt → Processo_001_Analise.md
+d) Salve o resultado como arquivo .docx na MESMA PASTA do Drive
+   - Nome: mesmo nome do .pdf, mas com sufixo "_Analise.docx"
+   - Exemplo: Processo_001.pdf → Processo_001_Analise.docx
    - Pasta: a pasta de origem do processo no Drive
+   - Crie um arquivo Word formatado a partir da análise Markdown (use o pacote 'docx' no terminal se precisar criar via script, ou se preferir eu mesmo faço a conversão)
 
 e) Use a ferramenta MCP: source_delete
    - source_id = o source_id do passo b (SOMENTE o do processo)
