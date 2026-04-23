@@ -56,7 +56,7 @@ Faça EM ORDEM:
 ```
 a) Use a ferramenta MCP: notebook_add_local_file
    - notebook_id = o campo "notebookId" do item
-   - path        = o campo "txtParaUpload" do item
+   - path        = o campo "fileParaUpload" do item  ← é um .pdf
 
 b) Guarde o source_id retornado (ex: "abc123-...")
 
@@ -86,7 +86,8 @@ a) Leia o campo "fonteSourceIds" do item no fila_pendente.json
 
 b) Use a ferramenta MCP: notebook_add_local_file
    - notebook_id = o campo "notebookId" do item
-   - path        = o campo "txtParaUpload" do item
+   - path        = o campo "fileParaUpload" do item  ← é um .pdf
+   ✅ O NotebookLM faz OCR automático. Funciona com PDFs escaneados.
    Guarde o source_id retornado (ex: "xyz789-...")
 
 c) Use a ferramenta MCP: notebook_query
