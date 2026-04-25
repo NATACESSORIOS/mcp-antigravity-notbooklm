@@ -29,7 +29,8 @@ const LOG_FILE    = path.join(__dirname, '..', 'fila.log');
 const DONE_FOLDER = '_processados';
 
 // Banco de metadados do Google Drive for Desktop
-const DRIVE_DB = 'C:\\\\Users\\\\GILBERTO\\\\AppData\\Local\\Google\\DriveFS\\111089556279935298242\\mirror_metadata_sqlite.db';
+const os = require('os');
+const DRIVE_DB = require('path').join(os.homedir(), 'AppData', 'Local', 'Google', 'DriveFS', '111089556279935298242', 'mirror_metadata_sqlite.db');
 
 // PadrÃ£o de nÃºmero de processo trabalhista
 const REGEX_NUMERO_PROCESSO = /\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}/;
@@ -200,4 +201,5 @@ processarFila().catch(err => {
     console.error('Erro crÃ­tico:', err);
     process.exit(1);
 });
+
 
